@@ -5,41 +5,44 @@ namespace Voice_Bot
 {
     class WeatherData
     {
-        private string city;
-        private float temp;
-        private string condition;
+        //private only properties commonly use for property that we don't expose them to the public e.g Data Repository, Domain Services
 
-        public WeatherData(string City)
+        //Property accessors (getter and setter)
+        public string City { get; set; }
+        public float Temperature { get; set; }
+        public string Condition { get; set; }
+
+        public WeatherData(string city)
         {
-            city = City;
+            City = city;
         }
 
         //Update weather
         public void CheckWeather()
         {
             WeatherAPI DataAPI = new WeatherAPI(City);
-            temp = DataAPI.GetTemp();
-            condition = DataAPI.GetCondition();
+            Temperature = DataAPI.GetTemp();
+            Condition = DataAPI.GetCondition();
         }
-
-        //Property accessors (getter and setter)
-        public string City { get => city; set => city = value; }
-        public float Temperature { get => temp; set => temp = value; }
-        public string Condition { get => condition; set => condition = value; }
     }
 
     class WeatherAPI
     {
+        //You need to create your own APIKEY in Openweathermap if you want to use its API
+        private const string APIKEY = "YOUR APIKEY HERE";
+        private string CurrentURL;
+        private XmlDocument _xmlDocument;
+
         public WeatherAPI(string city)
         {
             SetCurrentURL(city);
-            xmlDocument = GetXML(CurrentURL);
+            _xmlDocument = GetXML(CurrentURL);
         }
 
         public float GetTemp()
         {
             //Get value in temperature
-            XmlNode temp_node = xmlDocument.SelectSingleNode("//temperature");
+            XmlNode temp_node = _xmlDocument.SelectSingleNode("//temperature");
             XmlAttribute temp_value = temp_node.Attributes["value"];
             string temp_string = temp_value.Value;
 
@@ -49,17 +52,12 @@ namespace Voice_Bot
         public string GetCondition()
         {
             //Get value in weather
-            XmlNode condition_node = xmlDocument.SelectSingleNode("//weather");
+            XmlNode condition_node = _xmlDocument.SelectSingleNode("//weather");
             XmlAttribute condition_value = condition_node.Attributes["value"];
             string condition_string = condition_value.Value;
 
             return condition_string;
         }
-
-        //You need to create your own APIKEY in Openweathermap if you want to use its API
-        private const string APIKEY = "YOUR APIKEY HERE";
-        private string CurrentURL;
-        private XmlDocument xmlDocument;
 
         private void SetCurrentURL(string location)
         {
